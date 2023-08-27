@@ -1,9 +1,6 @@
 <?php namespace App;
 
 use Jenssegers\Blade\Blade;
-use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Validation;
 
 class Controller 
 {
