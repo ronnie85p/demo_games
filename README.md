@@ -4,4 +4,4 @@
    composer update
 3. Загрузить образы и собрать контейнер:
    docker compose -f docker-compose.yml up -d --build
-4. Импортировать таблицы из /migrates в базу данных.
+4. Импортировать таблицы из /migrates в базу данных test.
