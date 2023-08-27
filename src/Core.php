@@ -11,7 +11,7 @@ class Core
         }
 
         $db = include($config['db']);
-        $connections = ['test' => "{$db['type']}://{$db['username']}:{$db['password']}@{$db['host']}/{$db['database']}"];
+        $connections = ['test' => "{$db['type']}://{$db['username']}:{$db['password']}@{$db['host']}/{$db['database']}?charset={$db['charset']}"];
 
         $cfg = \ActiveRecord\Config::instance();
         $cfg->set_model_directory($env['model_path']);

@@ -7,5 +7,6 @@ return [
     'host' => 'mysql',
     'database' => 'test',
     'username' => 'test',
-    'password' => '1'
+    'password' => '1',
+    'charset' => 'utf8'
 ];
