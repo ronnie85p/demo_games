@@ -5,8 +5,8 @@ return [
 
     // defined in docker-composer.yml as mysql
     'host' => 'mysql',
-    'database' => 'test',
-    'username' => 'test',
+    'database' => 'demo_games',
+    'username' => 'demo',
     'password' => '1',
     'charset' => 'utf8'
 ];

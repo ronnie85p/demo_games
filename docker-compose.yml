@@ -25,9 +25,9 @@ services:
     ports:
       - "3306:3306"
     environment:
-      MYSQL_DATABASE: test
+      MYSQL_DATABASE: demo_games
       MYSQL_ROOT_PASSWORD: 1
-      MYSQL_USER: test
+      MYSQL_USER: demo
       MYSQL_PASSWORD: 1
       # MYSQL_SOCKET_DIR: /var/run/mysqld
       SERVICE_NAME: mysql
