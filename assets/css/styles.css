@@ -1,0 +1,26 @@
+body {
+  margin: 0;
+}
+
+.page-header {
+  background-color: #561818;
+}
+
+.page-body {
+  margin: 50px 0 50px 0;
+  height: 100vh;
+}
+
+.page-footer {
+  background-color: #363636;
+  color: white;
+}
+
+.container {
+  width: 1000px;
+  margin: auto;
+}
+
+.logo {
+  color: white;
+}

@@ -1,0 +1,25 @@
+{
+  "name": "ronny/games",
+  "type": "project",
+  "autoload": {
+    "psr-4": {
+      "Ronny\\Games\\": "src/"
+    },
+    "files": [
+      "src/Core.php",
+      "src/Router.php",
+      "src/Controller.php",
+      "src/Validator.php"
+    ]
+  },
+  "authors": [
+    {
+      "name": "ronny"
+    }
+  ],
+  "require": {
+    "jenssegers/blade": "^1.4",
+    "php-activerecord/php-activerecord": "^1.2",
+    "symfony/validator": "^6.3"
+  }
+}
