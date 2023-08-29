@@ -1,6 +1,40 @@
 {
   "name": "ronny/games",
   "type": "project",
+  "scripts": {
+    "docker-compose-build": [
+      "docker compose -f docker-compose.yml up -d --build"
+    ],
+    "docker-remove-images": [
+      "docker ps -a | grep 'demo_games*' | awk '{print $1}' | xargs docker stop",
+      "docker ps -a | grep 'demo_games*' | awk '{print $2}' | xargs docker rmi --force"
+    ],
+    "docker-remove-containers": [
+      "docker ps -a | grep 'demo_games*' | awk '{print $1}' | xargs docker rm --force"
+    ],
+    "docker-remove-volumes": [
+      "docker volume ls | grep 'demo_games*' | awk '{print $2}' | xargs docker volume rm"
+    ],
+    "docker-remove-all": [
+      "composer docker-remove-images",
+      "composer docker-remove-containers",
+      "composer docker-remove-volumes"
+    ],
+    "docker-clean-cache": [
+      "docker buildx prune"
+    ],
+    "docker-system": [
+      "docker system df"
+    ],
+    "db-migrate": [
+      "php migrate.php --database=demo_games"
+    ],
+    "dev-deploy": [
+      "composer update",
+      "composer docker-compose-build",
+      "composer db-migrate"
+    ]
+  },
   "autoload": {
     "psr-4": {
       "Ronny\\Games\\": "src/"
@@ -20,6 +54,7 @@
   "require": {
     "jenssegers/blade": "^1.4",
     "php-activerecord/php-activerecord": "^1.2",
-    "symfony/validator": "^6.3"
+    "symfony/validator": "^6.3",
+    "daveismyname/sql-import": "^2.0"
   }
 }
