@@ -63,7 +63,7 @@ class GamesController extends \App\Controller
     public function create()
     {
         $response = [];
-        
+
         if ($this->request->getMethod() === 'post') {
             $response = $this->fromJSON($this->api->create());
             $this->checkStatus($response);
@@ -89,7 +89,9 @@ class GamesController extends \App\Controller
             $response = $this->fromJSON($this->api->update($id));
             $this->checkStatus($response);
 
-            $this->response->redirect("/games/{$id}");
+            if (empty($response['errors'])) {
+                $this->response->redirect("/games/{$id}");
+            }
         } else {
             $response = $this->fromJSON($this->api->get($id));
             $this->checkStatus($response);
