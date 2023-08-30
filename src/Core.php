@@ -4,31 +4,58 @@ class Core
 {
     static $config = [];
     static $lang = [];
-    public static function run(array $config)
+    static $default_connection = 'test';
+    static $connection_datetime_format = 'Y-m-d H:i:s';
+    static $connections = [];
+
+    /**
+     * @param string $config_path
+     */
+    public static function run(string $config_path)
     {
-        if (!file_exists($config['db'])) {
-            throw new \Exception('Config file not exists');
+        self::loadConfig($config_path);
+        self::$lang = self::$config['lang'];
+
+        $model_path = self::$config['env']['models_path'] ?: dirname(__DIR__) . '/models';
+        self::dbConnection(
+            self::$config['db'], 
+            $model_path
+        );
+    }
+
+    /**
+     * @param string $path
+     */
+    public static function loadConfig(string $path)
+    {
+        $path = dirname(__DIR__) . '/' . trim($path, '/') . '/';
+        $files = array_diff(scandir($path) ?: [], ['..', '.']);
+        
+        self::$config = [];
+        foreach ($files as $file) {
+            $fullpath = $path . $file;
+            if (!file_exists($fullpath) || !is_file($fullpath)) {
+                continue;
+            }
+
+            $config = include($fullpath);
+            self::$config[preg_replace('/\..+$/', '', $file)] = $config;
         }
+    }
 
-        $db = include($config['db']);
-        $connections = ['test' => "{$db['type']}://{$db['username']}:{$db['password']}@{$db['host']}/{$db['database']}?charset={$db['charset']}"];
-
+    /**
+     * @param array $config
+     * @param string $model_path
+     */
+    public static function dbConnection(array $config, string $model_path)
+    {
+        self::$connections[self::$default_connection] = "{$config['type']}://{$config['username']}:{$config['password']}@{$config['host']}/{$config['database']}?charset={$config['charset']}";
+        
         $cfg = \ActiveRecord\Config::instance();
-        $cfg->set_model_directory($env['model_path']);
-        $cfg->set_connections($connections);
-        $cfg->set_default_connection('test');
+        $cfg->set_model_directory($model_path);
+        $cfg->set_connections(self::$connections);
+        $cfg->set_default_connection(self::$default_connection);
 
-        \ActiveRecord\Connection::$datetime_format = 'Y-m-d H:i:s';
-
-        $env = include($config['env']);
-        self::$config = $env;
-
-        $_lang = [];
-        include($config['lang']);
-        self::$lang = $_lang;
-
-        foreach ($env['routes'] as $route => $controller) {
-            Router::route($route, $controller);
-        }
+        \ActiveRecord\Connection::$datetime_format = self::$connection_datetime_format;
     }
 }

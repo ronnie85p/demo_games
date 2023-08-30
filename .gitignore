@@ -1,1 +1,5 @@
-vendor
+/.vscode
+/cache/
+/vendor
+/docker/apache/logs/
+/docker/mysql/logs/

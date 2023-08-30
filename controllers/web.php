@@ -1,4 +1,4 @@
-<?php namespace App\Controller;
+<?php namespace App\Controllers;
 
 class WebController extends \App\Controller 
 {
@@ -7,5 +7,3 @@ class WebController extends \App\Controller
         return $this->render('web/index');
     }
 }
-
-return __NAMESPACE__;

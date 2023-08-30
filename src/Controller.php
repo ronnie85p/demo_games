@@ -1,20 +1,59 @@
 <?php namespace App;
 
 use Jenssegers\Blade\Blade;
+use Pecee\Http\Response;
+use Pecee\SimpleRouter\SimpleRouter as Router;
 
-class Controller 
+abstract class Controller 
 {
+    public $compiler;
     public $validator;
     public $layout = 'layouts/default';
 
-    public function getCompiler()
+    /**
+     * @var \Pecee\Http\Response
+     */
+    protected $response;
+
+    /**
+     * @var \Pecee\Http\Request
+     */
+    protected $request;
+
+    /**
+     * @var \Pecee\Http\Input\InputHandler
+     */
+    protected $inputHandler;
+
+    public function __construct()
     {
-        return new Blade(
-            dirname(__DIR__) . '/views', 
-            dirname(__DIR__) . '/cache/blade'
-        ); 
+        $this->request = Router::router()->getRequest();
+        $this->response =  new Response($this->request);
+        $this->inputHandler = $this->request->getInputHandler();
     }
 
+    public function rules() { return []; }
+
+    /**
+     * @return \Jenssegers\Blade\Blade
+     */
+    public function getCompiler()
+    {
+        if (!$this->compiler) {
+            $blade = new Blade(
+                Core::$config['env']['views_path'], 
+                Core::$config['env']['cache_path'] . 'blade'
+            ); 
+
+            $this->compiler = $blade;
+        }
+
+        return $this->compiler;
+    }
+
+    /**
+     * @return \App\Validator
+     */
     public function getValidator()
     {
         if (!$this->validator) {
@@ -24,27 +63,38 @@ class Controller
         return $this->validator;
     }
 
-    public function redirect(string $uri, array $params = [])
+    /**
+     * @param string $tpl
+     * @param array<> $data
+     * @return string
+     */
+    public function renderTemplate(string $tpl, array $data = [])
     {
-        $params = http_build_query($params);
-        $params = empty($params) ? '' : '?' . $params;
-
-        header("Location: {$uri}{$params}");
+        return $this->compiler->render($tpl, $data);
     }
 
+    /**
+     * @param string $tpl
+     * @param array $data
+     * @return string
+     */
     public function render(string $tpl, array $data = []) 
     {
-        $compiler = $this->getCompiler();
+        $this->getCompiler();
 
-        $data = array_merge($data, ['config' => \App\Core::$config]);
-        $output = $compiler->render($tpl, $data);
+        $data = array_merge($data, [
+            'config' => Core::$config['env'],
+            'lang' => Core::$config['lang'],
+        ]);
+
+        $content = $this->renderTemplate($tpl, $data);
 
         if ($this->layout) {
-            $output = $compiler->render($this->layout, array_merge($data, [
-                'content' => $output,
+            $content = $this->renderTemplate($this->layout, array_merge($data, [
+                'content' => $content,
             ]));
         }
 
-        return $output;
+        return $content;
     }
 }

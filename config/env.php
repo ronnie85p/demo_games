@@ -1,20 +1,18 @@
 <?php
 
 define('APP_BASE_PATH', dirname(__DIR__) . '/');
-define('APP_CACHE_PATH', APP_BASE_PATH . 'cache/');
-define('APP_CONFIG_PATH', APP_BASE_PATH . 'config/');
-define('APP_MODEL_PATH', APP_BASE_PATH . 'model/');
-define('APP_VIEWS_PATH', APP_BASE_PATH . 'views/');
 define('APP_CORE_PATH', APP_BASE_PATH . 'src/');
+define('APP_CONFIG_PATH', APP_BASE_PATH . 'config/');
+define('APP_CACHE_PATH', APP_BASE_PATH . 'cache/');
+define('APP_MODELS_PATH', APP_BASE_PATH . 'models/');
+define('APP_VIEWS_PATH', APP_BASE_PATH . 'views/');
 define('APP_CONTROLLERS_PATH', APP_BASE_PATH . 'controllers/');
 
 return [
-    'model_path' => APP_MODEL_PATH,
-    'blade' => [
-        'views' => APP_VIEWS_PATH,
-        'cache' => APP_CACHE_PATH . 'blade/',
-    ],
-    'website' => 'Demo website',
+    'models_path' => APP_MODELS_PATH,
+    'views_path' => APP_VIEWS_PATH,
+    'cache_path' => APP_CACHE_PATH,  
+    'website' => 'Demo Games',
     'routes' => [
         '/' => function () {
             return 'Web/index';
