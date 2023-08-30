@@ -1,94 +1,46 @@
 <?php namespace App\Controllers;
 
-use Pecee\Http\Input\InputHandler;
-use Pecee\Http\Input\InputHandler\input;
-use Pecee\Http\Request;
-use Pecee\Http\Response;
+use App\Controllers\Api\V1\GamesController as ApiGamesController;
 use App\Models\Game;
 use App\Models\Genre;
 
 class GamesController extends \App\Controller
 {
-    public function rules()
+    public $api;
+
+    function __construct()
     {
-        return [
-            'name' => [
-                'required' => true
-            ],
-            'description' => [
-                'required' => true
-            ],
-            'genre_id' => [
-                'required' => true
-            ],
-            'author' => [
-                'required' => true
-            ],  
-        ];
+        parent::__construct();
+
+        $this->api = new ApiGamesController();
+        $this->api->request = $this->request;
+        $this->api->response = $this->response;
     }
 
-    // /**
-    //  * @param array $data
-    //  * @param array $params
-    //  * @return array
-    //  */
-    // public function prepareBeforeSave(array $data, array $params): array
-    // {
-    //     $this->getValidator();
-
-    //     $errors = $this->validator->validation($data, $this->rules);
-    //     if (empty($errors)) {
-    //         Game::prepareBeforeSave($data);
-
-    //         if (Game::doesExists($data, $params)) {
-    //             $errors['name'] = \App\Core::$lang['games_such_game_already_exists'];
-    //         }
-    //     }
-
-    //     return $errors;
-    // }
-
-    /**
-     * @return array
-     */
-    public function prepareListParams()
+    public function checkStatus($response)
     {
-        $genreId = (string) $this->inputHandler->get('genre_id', '');
-
-        $conditions = '';
-        if (!empty($genreId)) {
-            $conditions = "genre_id = {$genreId}";
+        if ($response['status'] !== 200) {
+            throw new \Exception($response['message'], $response['status']);
         }
-
-        return [
-            'conditions' => $conditions
-        ];
     }
 
-    // /**
-    //  * @return array
-    //  */
-    // public function getPostData()
-    // {
-    //     return filter_input_array(INPUT_POST, [
-    //         'name'        => FILTER_SANITIZE_ENCODED,
-    //         'description' => FILTER_SANITIZE_ENCODED,
-    //         'author'      => FILTER_SANITIZE_ENCODED,
-    //         'genre_id'    => FILTER_VALIDATE_INT,
-    //     ]);
-    // }
+    public function fromJSON($json)
+    {
+        return json_decode($json, true);
+    }
 
     /**
-     * @param \Pecee\Http\Request $request
      * @return string
      */
     public function getList()
     {
-        $items = Game::find('all', $this->prepareListParams());
+        $response = $this->fromJSON($this->api->list());
+        $this->checkStatus($response);
+
         $genres = Genre::find('all');
 
         return $this->render('games/list', [
-            'items' => $items,
+            'items' => $response['data'],
             'genres' => $genres
         ]);   
     }
@@ -97,96 +49,61 @@ class GamesController extends \App\Controller
      * @param int $id
      * @return string
      */
-    public function getItem(int $id)
+    public function get(int $id)
     {
-        $game = Game::find(['id' => $id]);
-        if (empty($game)) {
-            return $this->render('games/notfound');
-        }
+        $response = $this->fromJSON($this->api->get($id));
+        $this->checkStatus($response);
 
-        return $this->render('games/item',  [
-            'data' => $game
-        ]);  
+        return $this->render('games/item', $response);  
     }
 
     /**
-     * @param int $id
      * @return string
      */
     public function create()
     {
-        $errors = [];
+        if ($this->request->getMethod() === 'post') {
+            $response = $this->fromJSON($this->api->create());
+            $this->checkStatus($response);
 
-        // if (!empty($_POST)) {
-        //     $data = $this->getPostData();
-        //     $errors = $this->prepareBeforeSave($data, $params);
-        //     if (empty($errors)) {
-        //         if ($game = Game::create($data)) {
-        //             $this->redirect("/games/{$game->id}");
-        //         } 
-        //     }
-        // }
+            $this->response->redirect("/games/{$response['data']['id']}");
+        }
 
         $genres = Genre::find('all');
+        $response['genres'] = $genres;
 
-        return $this->render('games/create', [
-            // 'data' => $data,
-            'genres' => $genres,
-            'errors' => $errors
-        ]);  
+        return $this->render('games/create', $response);  
     }
 
     /**
-     * @param \Illuminate\Http\Request $request
      * @param int $id
      * @return string
      */
-    public function edit(Request $request, int $id)
+    public function edit(int $id)
     {
-        return 'games/edit';
-        $game = Game::find(['id' => $id]);
-        if (empty($game)) {
-            return $this->render('games/notfound');
-        }
+        if ($this->request->getMethod() === 'post') {
+            $response = $this->fromJSON($this->api->update($id));
+            $this->checkStatus($response);
 
-        $errors = [];
-
-        if (!empty($_POST)) {
-            $data = $this->getPostData();
-            $errors = $this->prepareBeforeSave($data, $params);
-            if (empty($errors)) {
-                $game->set_attributes($data); 
-                if ($game->save()) {
-                    $this->redirect("/games/{$game->id}");
-                } 
-            }
+            $this->response->redirect("/games/{$id}");
         } else {
-            $data = $game->attributes();
+            $response = $this->fromJSON($this->api->get($id));
+            $this->checkStatus($response);
         }
 
         $genres = Genre::find('all');
-
-        return $this->render('games/edit', [
-            'data' => $data,
-            'genres' => $genres,
-            'errors' => $errors
-        ]);  
+        $response['genres'] = $genres;
+        return $this->render('games/edit', $response);  
     }
 
     /**
-     * @param \Illuminate\Http\Request $request
      * @param int $id
      */
-    public function delete(Request $request, int $id)
+    public function delete(int $id)
     {
-        if ($game = Game::find(['id' => $id])) {
-            $game->delete();
-        }
+        $response = $this->fromJSON($this->api->delete($id));
+        $this->checkStatus($response);
 
-        $this->redirect('/games/list');
+        $this->response->redirect('/games');
     }
-
-
 }
-
-return __NAMESPACE__;

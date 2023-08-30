@@ -14,7 +14,7 @@ class Validator
         $this->rules = [
             'required' => [
                 'class' => \Symfony\Component\Validator\Constraints\NotBlank::class,
-                'message' => Core::$lang['form_field_required']
+                'message' => Core::$lang['form_field_required'] ?: ''
             ]
         ];
     }
@@ -22,10 +22,11 @@ class Validator
     public function validation(array $data, array $validation = [])
     {
         $errors = [];
+        
         foreach ($validation as $k => $rules) {
             if (!isset($data[$k])) continue;
-
-            $validateRules = [];
+        
+            $ruleInstances = [];
             foreach ($rules as $name => $opts) {
                 $opts = empty($opts) || is_bool($opts) ? [] : $opts;
                 $rule = empty($this->rules[$name]) ? [] : $this->rules[$name];
@@ -37,10 +38,10 @@ class Validator
                 $ruleClass = $rule['class'];
                 unset($rule['class']);
 
-                $validateRules[] = new $ruleClass($rule);
+                $ruleInstances[] = new $ruleClass($rule);
             }
 
-            $violations = $this->validator->validate($data[$k], $validateRules);
+            $violations = $this->validator->validate($data[$k], $ruleInstances);
             if ($violations->count() > 0) {
                 foreach ($violations as $violation) {
                     $errors[$k] = $violation->getMessage();   

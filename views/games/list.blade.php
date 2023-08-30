@@ -33,17 +33,17 @@
     <div class="row">
         @foreach( $items as $item )
             <div class="col-3 mb-4">
-                <a class="text-decoration-none" style="color: inherit" href="/games/{{ $item->id }}">
+                <a class="text-decoration-none" style="color: inherit" href="/games/{{ $item['id'] }}">
                     <div class="card">
                         <div class="card-body">
                             <div class="d-flex">
-                                <div class="h5 flex-grow-1 text-truncate">{{ $item->name }}</div>
+                                <div class="h5 flex-grow-1 text-truncate">{{ $item['name'] }}</div>
                                 <div>
-                                    <small class="text-muted" title="Жанр">{{ $item->genre->name }}</small>
+                                    <small class="text-muted" title="Жанр">{{ $item['genre']['name'] }}</small>
                                 </div>
                             </div>
 
-                            <div class="text-dark text-truncate">{{ $item->description }}</div>
+                            <div class="text-dark text-truncate">{{ $item['description'] }}</div>
                         </div>
                         <div class="card-footer">
                             <div class="text-muted">
@@ -55,10 +55,10 @@
                                         </svg> {{ $item->created_at }}
                                     </small> 
 
-                                    <small class="text-truncate" title="Автор: {{ $item->author }}">
+                                    <small class="text-truncate" title="Автор: {{ $item['author'] }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
                                             <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4Zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10Z"/>
-                                        </svg> {{ $item->author }}
+                                        </svg> {{ $item['author'] }}
                                     </small>
                                 </div>
                             </div>

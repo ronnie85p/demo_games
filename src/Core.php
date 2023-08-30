@@ -14,7 +14,7 @@ class Core
     public static function run(string $config_path)
     {
         self::loadConfig($config_path);
-        self::$lang = self::$config['lang'];
+        self::loadLang(self::$config['env']['lang_path']);
 
         $model_path = self::$config['env']['models_path'] ?: dirname(__DIR__) . '/models';
         self::dbConnection(
@@ -41,6 +41,21 @@ class Core
             $config = include($fullpath);
             self::$config[preg_replace('/\..+$/', '', $file)] = $config;
         }
+    }
+
+    public static function loadLang(string $path)
+    {
+        $path =  dirname(__DIR__) . '/' . trim($path, '/') . '/';
+        $path = $path . self::$config['env']['locale'] . '/';
+        $fullpath = $path . 'default.inc.php';
+        
+        if (!file_exists($fullpath)) {
+            throw new \Exception("Language '{$fullpath}' file not exists");
+        }
+
+        include $fullpath;
+
+        self::$lang = $_lang;
     }
 
     /**
