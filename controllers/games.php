@@ -62,11 +62,15 @@ class GamesController extends \App\Controller
      */
     public function create()
     {
+        $response = [];
+        
         if ($this->request->getMethod() === 'post') {
             $response = $this->fromJSON($this->api->create());
             $this->checkStatus($response);
 
-            $this->response->redirect("/games/{$response['data']['id']}");
+            if (empty($response['errors'])) {
+                $this->response->redirect("/games/{$response['data']['id']}");
+            }
         }
 
         $genres = Genre::find('all');
