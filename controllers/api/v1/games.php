@@ -62,13 +62,6 @@ class GamesController extends \App\ApiController
         ];
     }
 
-    public function toArray($model)
-    {
-        return array_merge($model->attributes(), [
-            'genre' => $model->genre->attributes()
-        ]);
-    }
-
     public function create()
     {
         $post = $this->inputHandler->getOriginalPost();
@@ -76,7 +69,7 @@ class GamesController extends \App\ApiController
 
         if (empty($errors)) {
             if ($model = Game::create($post)) {
-                $this->setResponseState('data', $this->toArray($model));
+                $this->setResponseState('data', $model->to_array());
             } else {
                 $this->setResponseState([
                     'status' => 500,
@@ -106,7 +99,7 @@ class GamesController extends \App\ApiController
 
             $this->setResponseState([
                 'errors' => $errors,
-                'data' => $this->toArray($model)
+                'data' => $model->to_array()
             ]); 
         } else {
             $this->setResponseState([
@@ -121,7 +114,7 @@ class GamesController extends \App\ApiController
     public function get(int $id)
     {
         if (!empty($model = Game::find(['id' => $id]))) {
-            $this->setResponseState('data', $this->toArray($model));
+            $this->setResponseState('data', $model->to_array());
         } else {
             $this->setResponseState([
                 'status', 404, 
@@ -135,9 +128,9 @@ class GamesController extends \App\ApiController
     public function list()
     {
         $items = array_map(function ($model) { 
-            return $this->toArray($model); 
+            return $model->to_array(); 
         }, Game::find('all', $this->prepareListParams()));
- 
+        
         return $this->getResponseStateJson([
             'data' => $items
         ]);

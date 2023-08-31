@@ -8,6 +8,16 @@ class Game extends \ActiveRecord\Model
         ['genre']
     ];
 
+    public function to_array($options = [])
+    {
+        $array = parent::to_array($options);
+        foreach (array_column(self::$belongs_to, 0) as $t) {
+            $array[$t] = $this->$t->attributes();
+        }
+
+        return $array;
+    }
+
     public static function prepareBeforeSave(array &$data)
     {
         $data['name'] = ucfirst(trim($data['name']));

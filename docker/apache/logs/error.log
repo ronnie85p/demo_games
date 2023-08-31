@@ -111,3 +111,8 @@ AH00558: apache2: Could not reliably determine the server's fully qualified doma
 AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.20.0.3. Set the 'ServerName' directive globally to suppress this message
 [Tue Aug 29 12:27:16.926740 2023] [mpm_prefork:notice] [pid 1] AH00163: Apache/2.4.57 (Debian) PHP/8.1.22 configured -- resuming normal operations
 [Tue Aug 29 12:27:16.926836 2023] [core:notice] [pid 1] AH00094: Command line: 'apache2 -D FOREGROUND'
+[Thu Aug 31 02:17:40.787227 2023] [mpm_prefork:error] [pid 1] AH00161: server reached MaxRequestWorkers setting, consider raising the MaxRequestWorkers setting
+[Thu Aug 31 02:20:48.752990 2023] [mpm_prefork:notice] [pid 1] AH00170: caught SIGWINCH, shutting down gracefully
+AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.20.0.3. Set the 'ServerName' directive globally to suppress this message
+[Thu Aug 31 02:20:51.609167 2023] [mpm_prefork:notice] [pid 1] AH00163: Apache/2.4.57 (Debian) PHP/8.1.22 configured -- resuming normal operations
+[Thu Aug 31 02:20:51.609242 2023] [core:notice] [pid 1] AH00094: Command line: 'apache2 -D FOREGROUND'

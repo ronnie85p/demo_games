@@ -6,27 +6,66 @@ use App\Models\Genre;
 
 class GamesController extends \App\Controller
 {
-    public $api;
+    private $apiConnection = [];
 
     function __construct()
     {
         parent::__construct();
 
-        $this->api = new ApiGamesController();
-        $this->api->request = $this->request;
-        $this->api->response = $this->response;
+        $this->apiConnection = [
+            'url' => 'http://localhost/api/v1/',
+            'port' => 80,
+            'proxy' => $_SERVER['SERVER_ADDR'] . ':80'
+        ];
     }
 
-    public function checkStatus($response)
+    public function getApiResponse($method, $action, $data = [])
     {
-        if ($response['status'] !== 200) {
-            throw new \Exception($response['message'], $response['status']);
+        $method = strtoupper($method);
+
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            // Point Connection
+            CURLOPT_PORT => $this->apiConnection['port'],
+            CURLOPT_URL => $this->apiConnection['url'] . $action,
+            CURLOPT_CUSTOMREQUEST => $method,
+
+            // Proxy for Docker
+            CURLOPT_PROXY => $this->apiConnection['proxy'],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER => false,
+
+            // SSL
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false,
+
+            // Data Used
+            CURLOPT_POST => $method === 'POST',
+        ]);
+
+        if (!empty($data) && in_array($method, ['POST', 'PUT'])) {
+            $payload = json_encode($data);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type:application/json']);
         }
-    }
 
-    public function fromJSON($json)
-    {
-        return json_decode($json, true);
+        $response = curl_exec($ch);
+
+        if (curl_errno($ch)) {
+            $error = curl_error($ch);
+            throw new \Exception($error, 500);
+        }
+
+        $response = json_decode($response, true);
+
+        if ($response['status'] !== 200) {
+            throw new \Exception(
+                $response['message'], 
+                $response['status']
+            );
+        }
+
+        return $response;
     }
 
     /**
@@ -34,9 +73,7 @@ class GamesController extends \App\Controller
      */
     public function getList()
     {
-        $response = $this->fromJSON($this->api->list());
-        $this->checkStatus($response);
-
+        $response = $this->getApiResponse('GET', 'games');
         $genres = Genre::find('all');
 
         return $this->render('games/list', [
@@ -51,8 +88,7 @@ class GamesController extends \App\Controller
      */
     public function get(int $id)
     {
-        $response = $this->fromJSON($this->api->get($id));
-        $this->checkStatus($response);
+        $response = $this->getApiResponse('GET', "games/{$id}");
 
         return $this->render('games/item', $response);  
     }
@@ -65,13 +101,18 @@ class GamesController extends \App\Controller
         $response = [];
 
         if ($this->request->getMethod() === 'post') {
-            $response = $this->fromJSON($this->api->create());
-            $this->checkStatus($response);
+            $response = $this->getApiResponse('POST', "games", 
+                $this->inputHandler->getOriginalPost()
+            );
 
             if (empty($response['errors'])) {
                 $this->response->redirect("/games/{$response['data']['id']}");
             }
-        }
+
+            if (empty($response['data'])) {
+                $response['data'] = $this->inputHandler->getOriginalPost();
+            }
+        } 
 
         $genres = Genre::find('all');
         $response['genres'] = $genres;
@@ -86,15 +127,19 @@ class GamesController extends \App\Controller
     public function edit(int $id)
     {
         if ($this->request->getMethod() === 'post') {
-            $response = $this->fromJSON($this->api->update($id));
-            $this->checkStatus($response);
+            $response = $this->getApiResponse('POST', "games/{$id}", 
+                $this->inputHandler->getOriginalPost()
+            );
 
             if (empty($response['errors'])) {
                 $this->response->redirect("/games/{$id}");
             }
+
+            if (empty($response['data'])) {
+                $response['data'] = $this->inputHandler->getOriginalPost();
+            }
         } else {
-            $response = $this->fromJSON($this->api->get($id));
-            $this->checkStatus($response);
+            $response = $this->getApiResponse('GET', "games/{$id}");
         }
 
         $genres = Genre::find('all');
@@ -107,8 +152,7 @@ class GamesController extends \App\Controller
      */
     public function delete(int $id)
     {
-        $response = $this->fromJSON($this->api->delete($id));
-        $this->checkStatus($response);
+        $response = $this->getApiResponse('DELETE', "games/{$id}");
 
         $this->response->redirect('/games');
     }
