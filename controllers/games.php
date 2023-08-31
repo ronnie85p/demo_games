@@ -30,6 +30,7 @@ class GamesController extends \App\Controller
                     $url .= "?{$params}";
                     break;
 
+                case 'PUT':
                 case 'POST':
                     $payload = json_encode($data);
                     curl_setopt($ch, CURLOPT_POST, true);
@@ -134,7 +135,7 @@ class GamesController extends \App\Controller
     public function edit(int $id)
     {
         if ($this->request->getMethod() === 'post') {
-            $response = $this->getApiResponse('POST', "games/{$id}", 
+            $response = $this->getApiResponse('PUT', "games/{$id}", 
                 $this->inputHandler->getOriginalPost()
             );
 
