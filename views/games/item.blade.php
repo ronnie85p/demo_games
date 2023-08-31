@@ -38,7 +38,7 @@
 
         <div class="row">
             <div class="col-2">Дата добавления:</div>
-            <div class="col">{{ $data->created_at }}</div>
+            <div class="col">{{ $data['created_at'] }}</div>
         </div>
     </div>
 
