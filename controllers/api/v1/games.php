@@ -87,7 +87,7 @@ class GamesController extends \App\ApiController
     {
         if (!empty($model = Game::find(['id' => $id]))) {
             $post = $this->inputHandler->getOriginalPost();
-            $errors = $this->prepareBeforeSave($post);
+            $errors = $this->prepareBeforeSave($post, $id);
     
             $model->set_attributes($post);
             if (empty($errors) && !$model->save()) {

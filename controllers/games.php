@@ -1,7 +1,5 @@
 <?php namespace App\Controllers;
 
-use App\Controllers\Api\V1\GamesController as ApiGamesController;
-use App\Models\Game;
 use App\Models\Genre;
 
 class GamesController extends \App\Controller
@@ -22,12 +20,29 @@ class GamesController extends \App\Controller
     public function getApiResponse($method, $action, $data = [])
     {
         $method = strtoupper($method);
-
+        $url = $this->apiConnection['url'] . $action;
         $ch = curl_init();
+
+        if (!empty($data)) {
+            switch ($method) {
+                case 'GET':
+                    $params = http_build_query($data);
+                    $url .= "?{$params}";
+                    break;
+
+                case 'POST':
+                    $payload = json_encode($data);
+                    curl_setopt($ch, CURLOPT_POST, true);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type:application/json']);
+                    break;
+            }
+        }
+
         curl_setopt_array($ch, [
             // Point Connection
             CURLOPT_PORT => $this->apiConnection['port'],
-            CURLOPT_URL => $this->apiConnection['url'] . $action,
+            CURLOPT_URL => $url,
             CURLOPT_CUSTOMREQUEST => $method,
 
             // Proxy for Docker
@@ -38,16 +53,7 @@ class GamesController extends \App\Controller
             // SSL
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => false,
-
-            // Data Used
-            CURLOPT_POST => $method === 'POST',
         ]);
-
-        if (!empty($data) && in_array($method, ['POST', 'PUT'])) {
-            $payload = json_encode($data);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type:application/json']);
-        }
 
         $response = curl_exec($ch);
 
@@ -73,7 +79,8 @@ class GamesController extends \App\Controller
      */
     public function getList()
     {
-        $response = $this->getApiResponse('GET', 'games');
+        $response = $this->getApiResponse('GET', 'games', 
+            $this->inputHandler->getOriginalParams());
         $genres = Genre::find('all');
 
         return $this->render('games/list', [
